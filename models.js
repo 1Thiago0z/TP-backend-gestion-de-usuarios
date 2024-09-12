@@ -33,10 +33,34 @@ const getUsers = (ulrFile) => {
   }
 };
 
+
+//const resp = getUsers(PATH_FILE_USER);
+//console.log(resp);
+
+
 const getUserById = (id) => {
   try {
-  } catch (error) {}
+    if (!id) {
+      throw new Error("ID is missing");
+    }
+
+    const users = getUsers(PATH_FILE_USER);
+
+    const user = users.find((user) => user.id === id);
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+    return user;
+
+    
+  } catch (error) {
+    const objError = errorLogger(error, PATH_FILE_ERROR);
+    return objError;
+  }
 };
+
+
 
 // addUser recibe un objeto con toda la data para el nuevo usuario
 // valida que esten los datos míminos para añadir un nuevo usuario
@@ -48,6 +72,10 @@ const addUser = (userData) => {
   try {
   } catch (error) {}
 };
+
+
+
+
 
 // todos los datos del usuario seleccionado se podrían modificar menos el ID
 // si se modifica la pass debería ser nuevamente hasheada
