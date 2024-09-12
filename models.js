@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { randomUUID } from "node:crypto";
+import { randomUUID, createHash } from "node:crypto";
 // Averiguar que importar de NODE para realizar el hash del pass
 import dotenv from "dotenv";
 import { handleError } from "./utils/handleError.js";
@@ -53,12 +53,13 @@ const getUserById = (id) => {
     }
     return user;
 
-    
+
   } catch (error) {
     const objError = errorLogger(error, PATH_FILE_ERROR);
     return objError;
   }
 };
+
 
 
 
@@ -70,9 +71,71 @@ const getUserById = (id) => {
 // hashea la contraseña antes de registrar al usuario
 const addUser = (userData) => {
   try {
-  } catch (error) {}
+    const { nombre, apellido, email, password,} = userData;
+
+    if (!nombre || !apellido || !email || !password) {
+      throw new Error("Missing data");
+    }
+
+
+    // Contenido nombre
+    if ((typeof nombre !== "string") || (typeof apellido !== "string") || (typeof email !== "string")){
+      throw new Error("Data not string");
+    }
+
+
+    // Contenido email
+    if (!email.includes("@")) {
+      throw new Error("Invalid email");
+    }
+
+
+
+
+    // Validar que el email no exista
+
+    const users = getUsers(PATH_FILE_USER);
+
+    const findEmail = users.find((user) => user.email === email);
+    if (findEmail) {
+      throw new Error("Email already exists");
+    }
+
+    const hash = createHash("sha256").update(password).digest("hex");
+
+    const newUser = 
+    {
+      id: randomUUID(),
+      nombre,
+      apellido,
+      email,
+      password: hash,
+      isLoggedIn: false
+  }
+
+
+    users.push(newUser);
+    writeFileSync(PATH_FILE_USER, JSON.stringify(users));
+    return newUser;
+
+
+
+  } catch (error) {
+    const objError = handleError(error, PATH_FILE_ERROR);
+    return objError;
+  }
 };
 
+
+const obj ={
+  nombre: "Thiago",
+  apellido: "Cugliari",
+  email: "thiago@hotmail.com",
+  password: "12345",
+}
+
+const resp = addUser(obj);
+console.log(resp);
 
 
 
