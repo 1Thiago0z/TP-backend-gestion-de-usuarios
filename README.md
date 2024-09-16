@@ -1,5 +1,7 @@
 # Aplicacion de Gestión de Usuarios
 
+Trabajo hecho con: Emmanuel Isaac, Luchof5, Carlos maria Pastore, Juan Pablo Rosso
+
 Esta es una aplicación de administración de usuarios construida con Node.js. La aplicación te permite gestionar usuarios mediante argumentos desde la línea de comandos. A continuación, se detallan las funcionalidades y cómo usarlas.
 
 ## Instalación
@@ -7,13 +9,13 @@ Esta es una aplicación de administración de usuarios construida con Node.js. L
 1. Clona el repositorio:
 
     ```bash
-    git clone https://github.com/EmmaIsaac/TP-1-Emmanuel-Isaac-Backend.git
+    git clone https://github.com/1Thiago0z/TP-backend-gestion-de-usuarios.git
     ```
 
 2. Navega al directorio del proyecto:
 
     ```bash
-    cd TP-1-Emmanuel-Isaac-Backend
+    cd Trabajo practico backend gestion de usuarios
     ```
 
 3. Instala las dependencias:
