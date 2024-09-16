@@ -127,30 +127,40 @@ const addUser = (userData) => {
 };
 
 
-const obj ={
-  nombre: "Thiago",
-  apellido: "Cugliari",
-  email: "thiago@hotmail.com",
-  password: "12345",
-}
-
-const resp = addUser(obj);
-console.log(resp);
+//const obj ={
+  //nombre: "Thiago",
+  //apellido: "Cugliari",
+  //email: "thiago@hotmail.com",
+  //password: "12345",
+//}
 
 
+//const resp = addUser(obj);
+//console.log(resp);
 
 
-// todos los datos del usuario seleccionado se podrían modificar menos el ID
+
+
+// todos los datos del usuario seleccionado se podrían odificar menos el ID
 // si se modifica la pass debería ser nuevamente hasheada
 // si se modifica el email, validar que este no exista
-const updateUser = (userData) => {
-  try {
-  } catch (error) {}
-};
-
 const deleteUser = (id) => {
   try {
-  } catch (error) {}
+    if (!id) {
+      throw new Error("ID is missing");
+    }
+
+    const users = getUsers(PATH_FILE_USER);
+    const userToDelete = getUserById(id);
+
+    const filteredUsers = users.filter((user) => user.id !== id);
+
+    writeFileSync(PATH_FILE_USER, JSON.stringify(filteredUsers));
+    return userToDelete;
+  } catch (error) {
+    const objError = handleError(error, PATH_FILE_ERROR);
+    return objError;
+  }
 };
 
 export { getUsers, getUserById, addUser, updateUser, deleteUser };
