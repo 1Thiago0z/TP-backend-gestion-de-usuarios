@@ -1,6 +1,6 @@
 # Aplicacion de Gestión de Usuarios
 
-Trabajo hecho con: Emmanuel Isaac, Luchof5, Carlos maria Pastore, Juan Pablo Rosso
+## Trabajo hecho con: Emmanuel Isaac, Luchof5, Carlos maria Pastore, Juan Pablo Rosso
 
 Esta es una aplicación de administración de usuarios construida con Node.js. La aplicación te permite gestionar usuarios mediante argumentos desde la línea de comandos. A continuación, se detallan las funcionalidades y cómo usarlas.
 
