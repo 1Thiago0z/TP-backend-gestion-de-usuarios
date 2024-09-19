@@ -1,30 +1,29 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { randomUUID, createHash } from "node:crypto";
-// Averiguar que importar de NODE para realizar el hash del pass
 import dotenv from "dotenv";
 import { handleError } from "./utils/handleError.js";
 
 // 1° recuperar variables de entorno
 dotenv.config();
-const PATH_FILE_USER = process.env.PATH_FILE_USER;
-const PATH_FILE_ERROR = process.env.PATH_FILE_ERROR;
+const PATH_FILE_USER=process.env.PATH_FILE_USER;
+const PATH_FILE_ERROR=process.env.PATH_FILE_ERROR;
 
 // 2° Declarar los metodos
 
-const getUsers = (ulrFile) => {
+const getUsers = (urlfile) => {
   try {
-    if (!ulrFile) {
-      throw new Error("Access denied");
+    if (!urlfile) {
+      throw new Error("Access denied")
     }
 
-    const exists = existsSync(ulrFile);
+    const exists = existsSync(urlfile);
 
     if (!exists) {
-      writeFileSync(ulrFile, JSON.stringify([]));
+      writeFileSync(urlfile, JSON.stringify([]));
       return [];
     }
-    
-    const users = JSON.parse(readFileSync(ulrFile))
+
+    const users = JSON.parse(readFileSync(urlfile));
     return users;
 
   } catch (error) {
@@ -33,92 +32,77 @@ const getUsers = (ulrFile) => {
   }
 };
 
-
-//const resp = getUsers(PATH_FILE_USER);
-//console.log(resp);
-
+// const resp = getUsers(PATH_FILE_USER);
+// console.log(resp);
 
 const getUserById = (id) => {
   try {
     if (!id) {
       throw new Error("ID is missing");
     }
-
+    
     const users = getUsers(PATH_FILE_USER);
-
     const user = users.find((user) => user.id === id);
 
     if (!user) {
       throw new Error("User not found");
     }
+
     return user;
-
-
   } catch (error) {
-    const objError = errorLogger(error, PATH_FILE_ERROR);
+    const objError = handleError(error, PATH_FILE_ERROR);
     return objError;
   }
 };
 
+// const resp = getUserById("897796d9-77a5-4d06-84f6-9fd9cc6ec045");
+// console.log(resp);
 
 
-
-// addUser recibe un objeto con toda la data para el nuevo usuario
-// valida que esten los datos míminos para añadir un nuevo usuario
-// valida que el nombre sea un string
-// valida que el apellido sea un string
-// valida que el email sea un string y que no se repita
-// hashea la contraseña antes de registrar al usuario
 const addUser = (userData) => {
   try {
-    const { nombre, apellido, email, password,} = userData;
-
-    if (!nombre || !apellido || !email || !password) {
+    // addUser recibe un objeto con toda la data para el nuevo usuario
+    const {nombre, apellido, email, password} =  userData;
+    
+    // valida que esten los datos míminos para añadir un nuevo usuario
+    if (!nombre || !apellido || !email || !password) { // es un OR que significa O ||
       throw new Error("Missing data");
     }
-
-
-    // Contenido nombre
+    // Validamos que el nombre, apellido, email sean string
     if ((typeof nombre !== "string") || (typeof apellido !== "string") || (typeof email !== "string")){
       throw new Error("Data not string");
     }
 
-
-    // Contenido email
+    // Validamos contenido de Email
     if (!email.includes("@")) {
-      throw new Error("Invalid email");
+      throw new Error("Invalid Email");
     }
-
-
-
-
-    // Validar que el email no exista
 
     const users = getUsers(PATH_FILE_USER);
 
     const findEmail = users.find((user) => user.email === email);
+
     if (findEmail) {
       throw new Error("Email already exists");
     }
 
-    const hash = createHash("sha256").update(password).digest("hex");
-
+    // hashea la contraseña antes de registrar al usuario
+    const hash = createHash("sha256").update(password).digest("hex")
+    
     const newUser = 
-    {
-      id: randomUUID(),
-      nombre,
-      apellido,
-      email,
-      password: hash,
-      isLoggedIn: false
-  }
-
-
+      {
+        id: randomUUID(),
+        nombre,
+        apellido,
+        email,
+        password: hash,
+        isLoggedIn: false
+    }
+    
     users.push(newUser);
+
     writeFileSync(PATH_FILE_USER, JSON.stringify(users));
     return newUser;
-
-
 
   } catch (error) {
     const objError = handleError(error, PATH_FILE_ERROR);
@@ -126,24 +110,77 @@ const addUser = (userData) => {
   }
 };
 
+// const obj = {
+//   "nombre": "Emma",
+//   "apellido":"Issac",
+//   "email":"EmmaIssac@gmail.com",
+//   "password":"1212"
+// }
 
-//const obj ={
-  //nombre: "Thiago",
-  //apellido: "Cugliari",
-  //email: "thiago@hotmail.com",
-  //password: "12345",
-//}
+// const resp = addUser(obj);
+// console.log(resp);
 
+const updateUser = (userData) => {
+  try {
+    const {id, nombre, apellido, email, password} = userData; // Ingresa la data
 
-//const resp = addUser(obj);
-//console.log(resp);
+    if (!id){ // Valida ID existente
+      throw new Error("ID is missing");
+    }
 
+    // Valido que todos los campos esten completos
+    if (!nombre || !apellido || !email || !password) {
+      throw new Error("Missing data");
+    }
+    // Valido que sean tring
+    if ((typeof nombre !== "string") || (typeof apellido !== "string") || (typeof email !== "string")) {
+      throw new Error("Data not string");
+    }
 
+    // Validamos contenido de Email
+    if (!email.includes("@")) {
+      throw new Error("Invalid Email");
+    }
+    const users = getUsers(PATH_FILE_USER); // llamada a usuarios
+    const user = users.find((user) => user.id === id); // busco id requerido
 
+    if (!user) { // si  no hay usuario retorna error
+      throw new Error("User not found");
+    }
 
-// todos los datos del usuario seleccionado se podrían odificar menos el ID
-// si se modifica la pass debería ser nuevamente hasheada
-// si se modifica el email, validar que este no exista
+    const filteredUsers = users.filter((user) => user.id !== id); // Filtro usuarios para comparar email
+    const foundEmail = filteredUsers.find((user) => user.email === email); // Verifico que no exista el email en los demas usuarios
+
+    if (foundEmail) {
+      throw new Error("Email already exists. Try another email"); // Si el email ya existe retorno error
+    }
+
+    // hashea la contraseña antes de registrar al usuario
+    const hash = createHash("sha256").update(password).digest("hex");
+
+    if (nombre) user.nombre = nombre;
+    if (apellido) user.apellido = apellido;
+    if (email) user.email = email;
+    if (password) user.password = hash;
+
+    writeFileSync(PATH_FILE_USER, JSON.stringify(users));
+    return user;
+  } catch (error) {
+    const objError = handleError(error, PATH_FILE_ERROR);
+    return objError;
+  }
+};
+
+// const obj = {
+//     "id":"897796d9-77a5-4d06-84f6-9fd9cc6ec045",
+//     "nombre":"Juan-Pablo",
+//     "apellido":"Rosso",
+//     "email":"juanpablorosso@gmail.com",
+//     "password":"3455"
+//   }  
+
+// console.log(updateUser(obj));
+
 const deleteUser = (id) => {
   try {
     if (!id) {
@@ -151,16 +188,18 @@ const deleteUser = (id) => {
     }
 
     const users = getUsers(PATH_FILE_USER);
-    const userToDelete = getUserById(id);
+    const userDelete = getUserById(id);
 
     const filteredUsers = users.filter((user) => user.id !== id);
 
     writeFileSync(PATH_FILE_USER, JSON.stringify(filteredUsers));
-    return userToDelete;
+    return userDelete;
   } catch (error) {
     const objError = handleError(error, PATH_FILE_ERROR);
     return objError;
   }
 };
 
-export { getUsers, getUserById, addUser, updateUser, deleteUser };
+// console.log(deleteUser("897796d9-77a5-4d06-84f6-9fd9cc6ec047"));
+
+export { getUsers, getUserById, addUser, updateUser, deleteUser, PATH_FILE_USER, PATH_FILE_ERROR};
